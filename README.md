@@ -18,43 +18,46 @@ The column "consul mode" means that we are using the first 2 nodes as Consul ser
 The cluster is to be used as a back-end for Docker cluster
 
 #### For each host [192.168.1.2 -> 192.168.1.5], check out and install Consul:
+```bash
       cd ~/
       git clone https://github.com/nhantran/docker-cluster-installer.git
       cd docker-cluster-installler
       sudo ./installConsul -bootstrap-ip "192.168.1.2,192.168.1.3"
-
+```
 #### Verify the installation on any hosts [192.168.1.2 -> 192.168.1.5]
+```bash
       consul members
-
+```
 ## Install Docker cluster
 This cluster is using the recent installed Consul cluster above as back-end
 
 #### For each host [192.168.1.2 -> 192.168.1.5], run the following command
+```bash
       sudo ./installDocker --node --consul-ip 192.168.1.2
-
+```
 #### On the host [192.168.1.100], run the following command
+```bash
       sudo ./installDocker --manager --consul-ip 192.168.1.2
-
+```
 #### Verify the installation on the "manager" host [192.168.1.100]
-
-List cluster info
-
+* List cluster info
+```bash
       docker -H :2385 info
-
-List out containers on cluster:
- 
+```
+* List out containers on cluster:
+ ```bash
      docker -H :2385 ps
-
-View log from each Cassandra container/service
-
+```
+* View log from each Cassandra container/service
+```bash
       docker -H :2385 logs <container-id>
-
-Submit a "start nginx container" request
-
+```
+* Submit a "start nginx container" request
+```bash
       docker -H :2385 run -d --name www -p 80:80 nginx:1.17.11
-
-Verify registered services
-
+```
+* Verify registered services
+```bash
       curl http://192.168.1.2:8500/v1/catalog/services | python -m json.tool
-
       curl http://192.168.1.2:8500/v1/catalog/service/nginx-80 | python -m json.tool
+```
