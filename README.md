@@ -3,18 +3,12 @@ In order to install a Docker cluster, you may need to install a "backend" such a
 Assume that we have some following hosts:
 
 host | IP | consul mode | docker mode
-
----- | -- | ----------- | -----------
-
-1 | 192.168.1.2 | server | node
-
-2 | 192.168.1.3 | server | node
-
-3 | 192.168.1.4 | client | node
-
-4 | 192.168.1.5 | client | node
-
-5 | 192.168.1.100 | N/A | manager
+-----|----|-------------|------------
+1 | 192.168.1.2   | server | node
+2 | 192.168.1.3   | server | node
+3 | 192.168.1.4   | client | node
+4 | 192.168.1.5   | client | node
+5 | 192.168.1.100 | N/A    | manager
 
 The column "docker mode" means that we want to create a Docker cluster across first 4 nodes and the last node used for managing the cluster.
 The column "consul mode" means that we are using the first 2 nodes as Consul servers and others as Consul clients. All of these are forming a Consul cluster that will be used as a back-end of our Docker cluster
@@ -41,19 +35,15 @@ The column "consul mode" means that we are using the first 2 nodes as Consul ser
 ### Verify the installation on the "manager" host [192.168.1.100]
 
 * List cluster info
-
       docker -H :2385 info
 
 * List out containers on cluster:
-
       docker -H :2385 ps
 
 * View log from each Cassandra container/service
-
       docker -H :2385 logs <container-id>
 
 * Submit a "start nginx container" request
-
       docker -H :2385 run -d --name www -p 80:80 nginx:1.17.11
 
 * Verify registered services
