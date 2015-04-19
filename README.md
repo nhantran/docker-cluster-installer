@@ -45,7 +45,7 @@ This cluster is using the recent installed Consul cluster above as back-end
       docker -H :2385 info
 ```
 * List out containers on cluster:
- ```bash
+```bash
      docker -H :2385 ps
 ```
 * View log from each Cassandra container/service
