@@ -12,7 +12,9 @@ host | IP | consul mode | docker mode
 
 The column "docker mode" means that we want to create a Docker cluster across first 4 nodes and the last node used for managing the cluster.
 
-The column "consul mode" means that we are using the first 2 nodes as Consul servers and others as Consul clients. All of these are forming a Consul cluster that will be used as a back-end of our Docker cluster
+The column "consul mode" means that we are using the first 2 nodes as Consul servers and others as Consul clients.
+
+All of these are forming a Consul cluster that will be used as a back-end of our Docker cluster
 
 ## Install Consul cluster
 The cluster is to be used as a back-end for Docker cluster
