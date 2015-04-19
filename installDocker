@@ -1,0 +1,57 @@
+#!/bin/bash
+
+function install_docker()
+{
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+  sh -c "echo deb https://get.docker.com/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+  apt-get update
+  apt-get install -y lxc-docker
+
+  sed -i -e "s/#DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4\"/DOCKER_OPTS=\"--dns 172.17.42.1 --dns 8.8.8.8 --dns-search service.consul -H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock --storage-driver=devicemapper\"/g" /etc/default/docker
+  service docker restart
+  sleep 5
+}
+
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
+# separately; see below.
+TEMP=`getopt -o nmc --long node,manager,consul-ip: -n 'dci' -- "$@"`
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+NODE=false
+MANAGER=false
+CONSUL_IP=
+HOST_IP=$(ifconfig eth0 | awk -F ' *|:' '/inet addr/{print $4}')
+NODE_NAME=$(hostname)
+CONSUL_REGISTRATOR="consul_registrator_$NODE_NAME"
+while true; do
+  case "$1" in
+    -n | --node ) NODE=true; shift ;;
+    -m | --manager ) MANAGER=true; shift ;;
+    -c | --consul-ip ) CONSUL_IP="$3"; shift 2 ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+done
+
+if [ "$NODE" = true ] && [ "$MANAGER" = true ];  then
+  exit 1
+fi
+
+if [ "$NODE" = true ]; then
+  install_docker
+  docker -H :2375 run -d swarm join --addr=$HOST_IP:2375 consul://$CONSUL_IP:8500/swarm
+  docker -H :2375 run -d --name $CONSUL_REGISTRATOR \
+                         -h $NODE_NAME \
+                         -v /var/run/docker.sock:/tmp/docker.sock \
+                         progrium/registrator \
+                         consul://$CONSUL_IP:8500
+fi
+
+if [ "$MANAGER" = true ]; then
+  install_docker
+  docker -H :2375 run -d -p 2385:2375 swarm manage consul://$CONSUL_IP:8500/swarm
+fi

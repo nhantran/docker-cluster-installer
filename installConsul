@@ -1,0 +1,79 @@
+#!/bin/bash
+
+function containsElement () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
+# separately; see below.
+TEMP=`getopt -o b --long bootstrap-ips: -n 'cci' -- "$@"`
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+while true; do
+  case "$1" in
+    -b | --bootstrap-ips ) BOOTSTRAP_IPS="$2"; shift 2 ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+done
+
+IFS=', ' read -a ip_array <<< "$BOOTSTRAP_IPS"
+
+# Download consul 0.5.0
+wget https://dl.bintray.com/mitchellh/consul/0.5.0_linux_amd64.zip
+# Install unzip
+apt-get install -y unzip
+# Extract the consul zip
+unzip 0.5.0_linux_amd64.zip
+# Move `consul` to /usr/local/bin
+mv consul /usr/local/bin
+# Create `consul` user
+useradd consul
+
+# Create folders for consul
+mkdir -p /etc/consul.d/server
+mkdir -p /var/consul
+
+HOST_IP=$(ifconfig eth0 | awk -F ' *|:' '/inet addr/{print $4}')
+
+# Create config json
+CONFIG_JSON=/etc/consul.d/server/config.json
+touch $CONFIG_JSON
+echo "{" >> $CONFIG_JSON
+
+containsElement "$HOST_IP" "${ip_array[@]}"
+if [ $? == 0 ] ; then
+  echo "  \"bootstrap_expect\": ${#ip_array[@]}," >> $CONFIG_JSON
+  echo "  \"server\": true," >> $CONFIG_JSON
+else
+  echo "  \"server\": false," >> $CONFIG_JSON
+fi
+
+echo "  \"data_dir\": \"/var/consul\"," >> $CONFIG_JSON
+echo "  \"log_level\": \"INFO\"," >> $CONFIG_JSON
+echo "  \"enable_syslog\": false," >> $CONFIG_JSON
+IPS=""
+
+for ip in "${ip_array[@]}"
+do
+  IPS+="\"$ip\","
+done
+IPS=${IPS%?}
+
+echo "  \"retry_join\": [$IPS]," >> $CONFIG_JSON
+echo "  \"client_addr\": \"0.0.0.0\"," >> $CONFIG_JSON
+echo "  \"ports\": {" >> $CONFIG_JSON
+echo "    \"dns\":	53" >> $CONFIG_JSON
+echo "    }," >> $CONFIG_JSON
+echo "  \"recursor\":	\"8.8.8.8\"" >> $CONFIG_JSON
+echo "}" >> $CONFIG_JSON
+
+cp consul.conf /etc/init
+chown -R consul:consul /etc/consul.d
+chown -R consul:consul /var/consul
