@@ -14,7 +14,8 @@ The column "docker mode" means that we want to create a Docker cluster across fi
 
 The column "consul mode" means that we are using the first 2 nodes as Consul servers and others as Consul clients. All of these are forming a Consul cluster that will be used as a back-end of our Docker cluster
 
-## Install Consul cluster to be used as a back-end
+## Install Consul cluster
+The cluster is to be used as a back-end for Docker cluster
 
 #### For each host [192.168.1.2 -> 192.168.1.5], check out and install Consul:
       cd ~/
@@ -25,7 +26,8 @@ The column "consul mode" means that we are using the first 2 nodes as Consul ser
 #### Verify the installation on any hosts [192.168.1.2 -> 192.168.1.5]
       consul members
 
-## Install Docker cluster using the recent installed Consul cluster above as back-end
+## Install Docker cluster
+This cluster is using the recent installed Consul cluster above as back-end
 
 #### For each host [192.168.1.2 -> 192.168.1.5], run the following command
       sudo ./installDocker --node --consul-ip 192.168.1.2
@@ -35,23 +37,23 @@ The column "consul mode" means that we are using the first 2 nodes as Consul ser
 
 #### Verify the installation on the "manager" host [192.168.1.100]
 
-* List cluster info
+List cluster info
 
       docker -H :2385 info
 
-* List out containers on cluster:
+List out containers on cluster:
+ 
+     docker -H :2385 ps
 
-      docker -H :2385 ps
-
-* View log from each Cassandra container/service
+View log from each Cassandra container/service
 
       docker -H :2385 logs <container-id>
 
-* Submit a "start nginx container" request
+Submit a "start nginx container" request
 
       docker -H :2385 run -d --name www -p 80:80 nginx:1.17.11
 
-* Verify registered services
+Verify registered services
 
       curl http://192.168.1.2:8500/v1/catalog/services | python -m json.tool
 
