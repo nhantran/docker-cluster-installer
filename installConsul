@@ -77,3 +77,5 @@ echo "}" >> $CONFIG_JSON
 cp consul.conf /etc/init
 chown -R consul:consul /etc/consul.d
 chown -R consul:consul /var/consul
+
+service consul start
