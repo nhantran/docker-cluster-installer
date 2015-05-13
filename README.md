@@ -24,7 +24,7 @@ The cluster is to be used as a back-end for Docker cluster
       cd ~/
       git clone https://github.com/nhantran/docker-cluster-installer.git
       cd docker-cluster-installler
-      sudo ./installConsul -bootstrap-ip "192.168.1.2,192.168.1.3"
+      sudo ./installConsul --bootstrap-ip "192.168.1.2,192.168.1.3"
 ```
 #### Verify the installation on any hosts [192.168.1.2 -> 192.168.1.5]
 ```bash
