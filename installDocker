@@ -47,7 +47,7 @@ if [ "$NODE" = true ]; then
   docker -H :2375 run -d --name $CONSUL_REGISTRATOR \
                          -h $NODE_NAME \
                          -v /var/run/docker.sock:/tmp/docker.sock \
-                         progrium/registrator \
+                         gliderlabs/registrator \
                          consul://$CONSUL_IP:8500
 fi
 
