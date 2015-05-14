@@ -56,7 +56,7 @@ This cluster is using the recent installed Consul cluster above as back-end
 ```
 * Submit a "start nginx container" request
 ```bash
-      docker -H :2385 run -d --name www -p 80:80 nginx:1.17.11
+      docker -H :2385 run -d --name www -p 80:80 nginx:1.7.11
 ```
 * Verify registered services
 ```bash
