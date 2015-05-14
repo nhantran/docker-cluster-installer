@@ -31,7 +31,7 @@ while true; do
   case "$1" in
     -n | --node ) NODE=true; shift ;;
     -m | --manager ) MANAGER=true; shift ;;
-    -c | --consul-ip ) CONSUL_IP="$3"; shift 2 ;;
+    -c | --consul-ip ) CONSUL_IP="$2"; shift 2 ;;
     -- ) shift; break ;;
     * ) break ;;
   esac
